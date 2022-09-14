@@ -1,24 +1,27 @@
 ﻿using CSharp_MongoDB.App;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 const string CONNECTION_STRING = "mongodb://localhost:27017";
 var client = new MongoClient(CONNECTION_STRING);
 
 var db = client.GetDatabase("products_db");
-var collection = db.GetCollection<BsonDocument>("products");
-var products = collection
-    .FindSync(new BsonDocument())
-    .ToList()
-    .Select(doc => BsonSerializer.Deserialize<Product>(doc))
-    .ToList();
-
-var res = from product in products
-    where product.Price > 2
-    select (product.Name, product.Price);
-
-foreach (var (name, price) in res)
+var collection = db.GetCollection<Product>("products");
+var product = new Product()
 {
-    Console.WriteLine($"{name} -> {price}");
+    Name = "Pro",
+    Price = 5.0,
+    Info = new Info()
+    {
+        Measure = "unit",
+        Amount = 0
+    }
+};
+
+collection.InsertOne(product);
+
+var products = collection.Find(new BsonDocument()).ToList();
+foreach (var p in products)
+{
+    Console.WriteLine($"{p.Name} -> {p.Price}");
 }
