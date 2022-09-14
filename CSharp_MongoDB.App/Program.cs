@@ -1,17 +1,18 @@
 ﻿using MongoDB.Driver;
 
 const string CONNECTION_STRING = "mongodb://localhost:27017";
-var db = new MongoClient(CONNECTION_STRING);
-var bases = db.ListDatabases();
-while (bases.MoveNext())
+var client = new MongoClient(CONNECTION_STRING);
+
+var db = client.GetDatabase("students_db");
+var collections = db.ListCollections();
+while (collections.MoveNext())
 {
-    foreach (var item in bases.Current)
+    foreach (var document in collections.Current)
     {
-        foreach (var element in item.Elements)
+        foreach (var element in document.Elements)
         {
             Console.WriteLine($"{element.Name} -> {element.Value}");
         }
-        Console.WriteLine("--- --- ---");
+        Console.WriteLine();
     }
 }
-
