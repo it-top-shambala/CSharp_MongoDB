@@ -8,11 +8,17 @@ var client = new MongoClient(CONNECTION_STRING);
 
 var db = client.GetDatabase("products_db");
 var collection = db.GetCollection<BsonDocument>("products");
-// var filter = new BsonDocument("product_name", "Product 2");
-var filter = new BsonDocument("price", new BsonDocument("$gt", 2));
-var products = collection.FindSync(filter).ToList();
-foreach (var document in products)
+var products = collection
+    .FindSync(new BsonDocument())
+    .ToList()
+    .Select(doc => BsonSerializer.Deserialize<Product>(doc))
+    .ToList();
+
+var res = from product in products
+    where product.Price > 2
+    select (product.Name, product.Price);
+
+foreach (var (name, price) in res)
 {
-    var product = BsonSerializer.Deserialize<Product>(document);
-    Console.WriteLine($"{product.Name}: {product.Price}");
+    Console.WriteLine($"{name} -> {price}");
 }
